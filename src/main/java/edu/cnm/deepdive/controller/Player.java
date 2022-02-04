@@ -3,43 +3,37 @@ package edu.cnm.deepdive.controller;
 import edu.cnm.deepdive.model.Game;
 import edu.cnm.deepdive.model.Guess;
 import edu.cnm.deepdive.service.GameRepository;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.Reader;
+import java.util.Scanner;
 
 public class Player {
 
   private final GameRepository repository;
-  private final InputStream input;
+  private final Scanner scanner;
   private final PrintStream output;
 
-  public Player(InputStream input, PrintStream output) {
-    this.input = input;
+  public Player(Scanner scanner, PrintStream output) {
+    this.scanner = scanner;
     this.output = output;
     repository = new GameRepository();
   }
 
   public void play(String pool, int length) throws IOException {
-    try (
-        Reader reader = new InputStreamReader(input);
-        BufferedReader buffer = new BufferedReader(reader);
-    ) {
-      Game game = repository.startGame(pool, length);
-      do {
-        String input = getGuess(game, buffer);
-        Guess guess = repository.submitGuess(game, input);
-        displayOutcome(guess);
-      } while (!game.isSolved());
-      // TODO: Display ending summary.
-    }
+    Game game = repository.startGame(pool, length);
+    do {
+      String input = getGuess(game);
+      Guess guess = repository.submitGuess(game, input);
+      displayOutcome(guess);
+    } while (!game.isSolved());
+    // TODO: Display ending summary.
   }
 
-  private String getGuess(Game game, BufferedReader buffer) throws IOException {
+  private String getGuess(Game game) throws IOException {
     output.printf("Pool: \"%s\"; length: %d.%nEnter guess: ", game.getPool(), game.getLength());
-    String input = buffer.readLine().trim();
+    String input = scanner
+        .nextLine()
+        .trim();
     // TODO: Validate input using the pool and length.
     return input;
   }
